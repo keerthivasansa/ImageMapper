@@ -98,7 +98,9 @@ class ImageIntent : AppCompatActivity() {
         val sellerName = data.name
         sellerDetails.setText(sellerName)
         openBtn.setOnClickListener {
-            seller.openSeller(applicationContext)
+            activityScope.launch {
+                seller.openSeller(applicationContext)
+            }
         }
     }
 

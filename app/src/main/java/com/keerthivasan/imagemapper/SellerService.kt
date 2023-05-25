@@ -29,6 +29,10 @@ class SellerService(private val sellerId: String) {
         return sellerNames
     }
 
+    fun getSellerId(sellerName:String): String? {
+        return sellerMap[sellerName]
+    }
+
     private fun getSellerFromDoc(doc: DocumentSnapshot?): Seller {
         val name = doc?.getString("name")
         val number = doc?.getLong("number")
@@ -47,9 +51,9 @@ class SellerService(private val sellerId: String) {
         return getSellerFromDoc(doc)
     }
 
-    fun openSeller(ctx: Context) {
+    suspend fun openSeller(ctx: Context) {
         if (data == null)
-            throw Error("Called openSeller before get")
+            get()
         val phoneNumber = data!!.number
         val intent = Intent(Intent.ACTION_VIEW)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
