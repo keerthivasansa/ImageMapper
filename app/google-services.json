@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "18072590765",
+    "project_id": "imagemapper-89e62",
+    "storage_bucket": "imagemapper-89e62.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:18072590765:android:6a8787a7c88a05047d2924",
+        "android_client_info": {
+          "package_name": "com.keerthivasan.imagemapper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "18072590765-6o1rjf8d3ip4teilkmvo6arkfrk7vjc4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApMWWFT--vwkGcTtIBgyjOP8b1uWZL0lA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "18072590765-6o1rjf8d3ip4teilkmvo6arkfrk7vjc4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
