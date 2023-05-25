@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:paddingTop="24dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:layout_height="match_parent"
+    tools:context=".NewSeller">
+
+    <TextView
+        android:id="@+id/seller_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="Enter the name of seller:" />
+
+    <EditText
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        app:layout_constraintStart_toEndOf="@+id/seller_name_label"
+        app:layout_constraintTop_toTopOf="@+id/seller_name_label"
+        android:id="@+id/seller_name_input"
+        />
+
+
+    <TextView
+        android:id="@+id/seller_number_label"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/seller_name_input"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="Enter the number of seller:" />
+
+    <EditText
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal"
+        android:layout_marginStart="24dp"
+        app:layout_constraintStart_toEndOf="@+id/seller_number_label"
+        app:layout_constraintTop_toTopOf="@+id/seller_number_label"
+        android:id="@+id/seller_number_input"
+        />
+
+    <Button
+        android:id="@+id/save_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        app:layout_constraintTop_toBottomOf="@+id/seller_number_label"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="12dp"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

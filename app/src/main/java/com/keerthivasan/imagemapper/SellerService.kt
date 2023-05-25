@@ -62,4 +62,12 @@ class SellerService(private val sellerId: String) {
         ctx.startActivity(intent)
     }
 
+    fun createSeller(name: String, number: Long, ctx: Context) {
+        val seller = hashMapOf("name" to name, "number" to number)
+        collectionRef
+            .add(seller)
+            .addOnSuccessListener {
+                Utils.showToast("Successfully saved seller.", ctx)
+            }
+    }
 }
