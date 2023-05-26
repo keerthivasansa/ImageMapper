@@ -2,8 +2,11 @@ package com.keerthivasan.imagemapper
 
 import android.content.Intent
 import android.net.Uri
+import android.opengl.Visibility
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -71,21 +74,24 @@ class ImageIntent : AppCompatActivity() {
 
     private suspend fun updateDetails(docId: String) {
         val messageText = intent.getStringExtra(Intent.EXTRA_TEXT)
-        val descInput = findViewById<EditText>(R.id.url_input)
+        val descInput = findViewById<EditText>(R.id.desc_input)
         val doc = collectionRef.document(docId).get().await()
-        val docExists = doc != null
-        if (!docExists) {
-            showToast("Creating new record")
+        val desc = doc.getString("description")
+        if (desc == null) {
+            title = "Create new product"
             if (messageText != null)
                 descInput.setText(messageText)
-            return
+        } else {
+            title = "Existing Product"
         }
-        val desc = doc.getString("description")
         descInput.setText(desc)
         val sellerId = doc.getString("seller")
         val sellerDetails = findViewById<Spinner>(R.id.seller_select)
         val sellers = sellerService.getSellerNames()
         sellerDetails.adapter = ArrayAdapter(applicationContext, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, sellers)
+
+        val openBtn = findViewById<Button>(R.id.open_btn)
+
         if (sellerId != null) {
             val seller = SellerService(sellerId)
             val data = seller.get()
@@ -93,10 +99,14 @@ class ImageIntent : AppCompatActivity() {
             val index = sellers.indexOf(sellerName)
             sellerDetails.setSelection(index)
         }
-        val openBtn = findViewById<Button>(R.id.open_btn)
 
         openBtn.setOnClickListener {
-            val activeSellerName = sellers[sellerDetails.selectedItemPosition]
+            val selectedPosition = sellerDetails.selectedItemPosition
+            if (selectedPosition == AdapterView.INVALID_POSITION) {
+                showToast("No seller selected")
+                return@setOnClickListener
+            }
+            val activeSellerName = sellers[selectedPosition]
             val id = sellerService.getSellerId(activeSellerName) ?: throw Error("Failed to get current seller id")
             activityScope.launch {
                 SellerService(id).openSeller(applicationContext)
@@ -106,7 +116,7 @@ class ImageIntent : AppCompatActivity() {
 
     private fun handleImage() {
         val imagePreview = findViewById<ImageView>(R.id.image_preview)
-        val descInput = findViewById<EditText>(R.id.url_input)
+        val descInput = findViewById<EditText>(R.id.desc_input)
         val sellerInput = findViewById<Spinner>(R.id.seller_select)
         val item = intent.clipData?.getItemAt(0)
         val saveBtn = findViewById<Button>(R.id.save_btn)

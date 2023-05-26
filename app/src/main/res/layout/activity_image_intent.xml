@@ -32,13 +32,16 @@
         android:layout_marginTop="40dp"
         android:text="Enter a description for this image:" />
 
-    <EditText
-        android:id="@+id/url_input"
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:textSize="12sp"
-        android:layout_marginTop="24dp"
-        />
+        <EditText
+            android:id="@+id/desc_input"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            android:textSize="12sp"
+            android:scrollbarStyle="outsideInset"
+            android:inputType="textMultiLine"
+            android:layout_marginTop="24dp"
+            />
+
 
         <LinearLayout
             android:layout_width="wrap_content"
