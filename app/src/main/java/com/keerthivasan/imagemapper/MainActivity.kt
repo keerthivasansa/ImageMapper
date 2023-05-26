@@ -1,5 +1,6 @@
 package com.keerthivasan.imagemapper
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        title = "Sellers"
         showSellers()
         val createBtn = findViewById<FloatingActionButton>(R.id.create_btn)
         createBtn.setOnClickListener {
