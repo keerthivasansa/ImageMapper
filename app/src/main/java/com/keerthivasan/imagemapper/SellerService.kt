@@ -18,7 +18,7 @@ class SellerService(private val sellerId: String) {
     private var data: Seller? = null
     private val sellerMap: MutableMap<String, String> = mutableMapOf()
 
-    suspend fun getSellers(): List<String> {
+    suspend fun getSellerNames(): List<String> {
         val docs = collectionRef.get().await() ?: return listOf()
         sellerMap.clear()
         val sellerNames = docs.documents.map {doc ->
@@ -31,6 +31,14 @@ class SellerService(private val sellerId: String) {
 
     fun getSellerId(sellerName:String): String? {
         return sellerMap[sellerName]
+    }
+
+    fun getSellerName(sellerId:String):String? {
+        sellerMap.forEach { (name, id) ->
+            if (id == sellerId)
+                return name
+        }
+        return null
     }
 
     private fun getSellerFromDoc(doc: DocumentSnapshot?): Seller {
@@ -46,7 +54,7 @@ class SellerService(private val sellerId: String) {
 
     suspend fun get(): Seller {
         if (data != null)
-            return data as Seller;
+            return data as Seller
         val doc = collectionRef.document(sellerId).get().await()
         return getSellerFromDoc(doc)
     }

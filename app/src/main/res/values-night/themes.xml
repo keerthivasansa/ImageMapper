@@ -5,4 +5,4 @@
         <item name="colorPrimary">#A900C5</item>
     </style>
     <style name="Theme.ImageMapper" parent="Base.Theme.ImageMapper" />
-</resource>
+</resources>

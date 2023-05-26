@@ -4,15 +4,16 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.Toast
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.BufferedReader
@@ -25,12 +26,9 @@ class ImageIntent : AppCompatActivity() {
         Toast.makeText(applicationContext, text, Toast.LENGTH_LONG).show()
     }
 
-
-    private lateinit var job: Job
-
     private val db = Firebase.firestore
     private val collectionRef = db.collection("images")
-
+    private val sellerService = SellerService("")
     private val activityScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +43,6 @@ class ImageIntent : AppCompatActivity() {
             }
             else -> showToast("Started with another intent")
         }
-        job = Job()
     }
 
     private fun md5(input:String): String {
@@ -85,16 +82,24 @@ class ImageIntent : AppCompatActivity() {
         }
         val desc = doc.getString("description")
         descInput.setText(desc)
-        val sellerId = doc.getString("seller") ?: return
-        val sellerDetails = findViewById<EditText>(R.id.seller_info)
-        val seller = SellerService(sellerId)
-        val data = seller.get()
+        val sellerId = doc.getString("seller")
+        val sellerDetails = findViewById<Spinner>(R.id.seller_select)
+        val sellers = sellerService.getSellerNames()
+        sellerDetails.adapter = ArrayAdapter(applicationContext, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, sellers)
+        if (sellerId != null) {
+            val seller = SellerService(sellerId)
+            val data = seller.get()
+            val sellerName = data.name
+            val index = sellers.indexOf(sellerName)
+            sellerDetails.setSelection(index)
+        }
         val openBtn = findViewById<Button>(R.id.open_btn)
-        val sellerName = data.name
-        sellerDetails.setText(sellerName)
+
         openBtn.setOnClickListener {
+            val activeSellerName = sellers[sellerDetails.selectedItemPosition]
+            val id = sellerService.getSellerId(activeSellerName) ?: throw Error("Failed to get current seller id")
             activityScope.launch {
-                seller.openSeller(applicationContext)
+                SellerService(id).openSeller(applicationContext)
             }
         }
     }
@@ -102,7 +107,7 @@ class ImageIntent : AppCompatActivity() {
     private fun handleImage() {
         val imagePreview = findViewById<ImageView>(R.id.image_preview)
         val descInput = findViewById<EditText>(R.id.url_input)
-        val sellerInput = findViewById<EditText>(R.id.seller_info)
+        val sellerInput = findViewById<Spinner>(R.id.seller_select)
         val item = intent.clipData?.getItemAt(0)
         val saveBtn = findViewById<Button>(R.id.save_btn)
         item?.uri?.let {
@@ -113,8 +118,9 @@ class ImageIntent : AppCompatActivity() {
 
             saveBtn.setOnClickListener {
                 val desc = descInput.text.toString()
-                val sellerInfo = sellerInput.text.toString()
-                val newData = hashMapOf("description" to desc, "seller" to sellerInfo)
+                val sellerName = sellerInput.selectedItem.toString()
+                val sellerId = sellerService.getSellerId(sellerName)
+                val newData = hashMapOf("description" to desc, "seller" to sellerId)
                 collectionRef.document(hash).set(newData)
                     .addOnSuccessListener {
                     showToast("Saved to database!")
@@ -125,11 +131,5 @@ class ImageIntent : AppCompatActivity() {
                 updateDetails(hash)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job.cancel()
     }
 }
