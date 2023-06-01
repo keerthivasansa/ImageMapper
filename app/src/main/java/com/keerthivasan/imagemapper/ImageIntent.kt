@@ -72,7 +72,7 @@ class ImageIntent : AppCompatActivity() {
         return stringBuilder.toString()
     }
 
-    private suspend fun updateDetails(docId: String) {
+    private suspend fun updateDetails(docId: String, imageUri: Uri) {
         val messageText = intent.getStringExtra(Intent.EXTRA_TEXT)
         val descInput = findViewById<EditText>(R.id.desc_input)
         val doc = collectionRef.document(docId).get().await()
@@ -109,7 +109,7 @@ class ImageIntent : AppCompatActivity() {
             val activeSellerName = sellers[selectedPosition]
             val id = sellerService.getSellerId(activeSellerName) ?: throw Error("Failed to get current seller id")
             activityScope.launch {
-                SellerService(id).openSeller(applicationContext)
+                SellerService(id).openSellerWithImage(applicationContext, imageUri)
             }
         }
     }
@@ -138,7 +138,7 @@ class ImageIntent : AppCompatActivity() {
             }
 
             activityScope.launch {
-                updateDetails(hash)
+                updateDetails(hash, it)
             }
         }
     }

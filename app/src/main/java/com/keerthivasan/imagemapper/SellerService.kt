@@ -8,6 +8,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 
+
 data class Seller(val name: String, val number: Long, val id: String)
 
 
@@ -66,8 +67,27 @@ class SellerService(private val sellerId: String) {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber")
+
         intent.setPackage("com.whatsapp")
         ctx.startActivity(intent)
+    }
+
+    suspend fun openSellerWithImage(ctx:Context, imageUri: Uri) {
+        if (data == null)
+            get()
+        val phoneNumber = data!!.number
+        val number = "91$phoneNumber"
+        val intentShareFile = Intent(Intent.ACTION_SEND)
+        val message = "Is this available?"
+
+        intentShareFile.type = "image/*"
+        intentShareFile.putExtra(Intent.EXTRA_STREAM, imageUri)
+        intentShareFile.putExtra(Intent.EXTRA_TEXT, message)
+        intentShareFile.putExtra("jid", "$number@s.whatsapp.net")
+        intentShareFile.setPackage("com.whatsapp")
+        intentShareFile.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
+        ctx.startActivity(intentShareFile)
     }
 
     fun createSeller(name: String, number: Long, ctx: Context) {

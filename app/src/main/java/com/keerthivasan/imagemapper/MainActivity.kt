@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Toolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,11 +14,13 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private val activityScope = CoroutineScope(Dispatchers.Main)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        title = "Sellers"
+
+        val toolbar = findViewById<Toolbar>(androidx.appcompat.R.id.custom)
+        setActionBar(toolbar)
+
         showSellers()
         val createBtn = findViewById<FloatingActionButton>(R.id.create_btn)
         createBtn.setOnClickListener {
