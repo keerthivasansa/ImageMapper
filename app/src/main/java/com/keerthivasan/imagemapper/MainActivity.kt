@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         showSellers()
         val createBtn = findViewById<FloatingActionButton>(R.id.create_btn)
         createBtn.setOnClickListener {
-            val switch = Intent(this@MainActivity, NewSeller::class.java)
+            val switch = Intent(this@MainActivity, CreateSeller::class.java)
             startActivity(switch)
         }
     }

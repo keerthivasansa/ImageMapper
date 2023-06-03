@@ -11,4 +11,6 @@
         <item>Divide</item>
         <item>Multiply</item>
     </string-array>
+    <string name="title_activity_demo">Demo</string>
+    <string name="title_activity_main2">MainActivity2</string>
 </resources>
