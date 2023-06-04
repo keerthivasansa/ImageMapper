@@ -54,7 +54,7 @@ class MainActivity2 : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Scaffold(
-                        floatingActionButton = { CreateSellerFAB(applicationContext) },
+                        floatingActionButton = { CreateSellerFAB() },
                         floatingActionButtonPosition = FabPosition.End,
                         topBar = { AppBar() }
                     ) { padding ->
@@ -74,7 +74,8 @@ fun AppBar() {
 }
 
 @Composable
-fun CreateSellerFAB(context: Context) {
+fun CreateSellerFAB() {
+    val context = LocalContext.current
     val switchIntent = Intent(context, CreateSeller::class.java)
     FloatingActionButton(onClick = {
         context.startActivity(switchIntent)

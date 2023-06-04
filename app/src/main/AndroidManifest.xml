@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Demo"
+            android:name=".CreateSeller"
             android:exported="false"
             android:label="@string/title_activity_demo"
             android:theme="@style/AppTheme" />
