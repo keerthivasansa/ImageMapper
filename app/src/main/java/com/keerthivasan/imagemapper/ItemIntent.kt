@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package com.keerthivasan.imagemapper
 
@@ -8,14 +8,19 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -29,7 +34,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,10 +77,11 @@ class ItemIntent : ComponentActivity() {
             ImageMapperTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     var currentItem by remember { mutableStateOf<Item?>(null) }
                     var sellers by remember { mutableStateOf<List<Seller>>(listOf()) }
+                    val scrollState = rememberScrollState()
 
                     LaunchedEffect(Unit) {
                         val item = getItem()
@@ -85,14 +90,20 @@ class ItemIntent : ComponentActivity() {
                                 .show()
                         currentItem = item
                         sellers = sellerService.getSellers()
+                        if (item?.sellerId == "" && sellers.isNotEmpty())
+                            currentItem = item.copy(sellerId = sellers.first().id)
                     }
 
                     Column(
+                        modifier = Modifier
+                            .verticalScroll(scrollState)
+                            .fillMaxWidth()
+                            .padding(top = 24.dp, bottom = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(
                             16.dp,
                             Alignment.CenterVertically
-                        )
+                        ),
                     ) {
                         ItemScreen(currentItem, onDescriptionChange = {
                             val newItem = currentItem?.copy(description = it)
@@ -100,7 +111,7 @@ class ItemIntent : ComponentActivity() {
                         })
                         Dropdown(
                             "Seller:",
-                            sellers.map { seller -> seller.name },
+                            sellers,
                             currentItem,
                             onChange = { currentItem = currentItem?.copy(sellerId = it) })
                         CalendarDialog(currentItem)
@@ -108,7 +119,10 @@ class ItemIntent : ComponentActivity() {
                             Button(onClick = { saveItem(currentItem) }) {
                                 Text("Save")
                             }
-                            Button(onClick = { openSellerChat(currentItem) }) {
+                            Button(
+                                onClick = { openSellerChat(currentItem) },
+                                Modifier.padding(start = 24.dp)
+                            ) {
                                 Text("Open")
                             }
                         }
@@ -124,7 +138,7 @@ class ItemIntent : ComponentActivity() {
         val seller = SellerService(currentItem.sellerId)
         coroutineScope.launch {
             seller.get()
-            seller.openSeller(applicationContext)
+            seller.openSellerWithImage(applicationContext, currentItem.imageUri)
         }
     }
 
@@ -172,20 +186,21 @@ class ItemIntent : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarDialog(currentItem: Item?) {
     val shape = RoundedCornerShape(8.dp)
-    val formatter = DateFormat.getInstance()
+    val formatter = DateFormat.getDateTimeInstance()
 
     TextField(
         textStyle = TextStyle.Default.copy(
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Light
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold
         ),
         readOnly = true,
         value = formatter.format(currentItem?.date ?: Date()),
         onValueChange = {},
-        label = { Text("Created on:", fontWeight = FontWeight.Bold) },
+        label = { Text("Created on:", fontWeight = FontWeight.ExtraBold ) },
         trailingIcon = {
             Icon(
                 painterResource(com.google.android.material.R.drawable.material_ic_calendar_black_24dp),
@@ -211,8 +226,8 @@ fun ItemScreen(
             painter = rememberAsyncImagePainter(currentItem.imageUri),
             contentDescription = "Item Image",
             modifier = Modifier
-                .width(200.dp)
-                .height(350.dp)
+                .width(300.dp)
+                .height(300.dp)
         )
         TextField(value = currentItem.description, onValueChange = onDescriptionChange)
     } else {

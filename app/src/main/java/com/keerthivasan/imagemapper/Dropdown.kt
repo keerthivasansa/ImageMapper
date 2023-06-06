@@ -22,15 +22,15 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Dropdown(label:String, options: List<String>, currentItem: Item?, onChange: (String) -> Unit) {
+fun Dropdown(label:String, options: List<Seller>, currentItem: Item?, onChange: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-
-    val shape = if (expanded) RoundedCornerShape(8.dp).copy(bottomEnd = CornerSize(0.dp), bottomStart = CornerSize(0.dp))
-    else RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(8.dp)
 
     var selectedOption = currentItem?.sellerId ?: ""
     if (selectedOption.isEmpty() && options.isNotEmpty())
-        selectedOption = options.first()
+        selectedOption = options.first().id
+
+    val currentSellerName = options.find { seller -> seller.id == selectedOption }?.name ?: ""
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -40,12 +40,12 @@ fun Dropdown(label:String, options: List<String>, currentItem: Item?, onChange: 
         TextField(
             modifier = Modifier.menuAnchor(),
             textStyle = TextStyle.Default.copy(
-                fontSize = 14.sp,
-                fontWeight=  FontWeight.Light),
+                fontSize = 15.sp,
+                fontWeight=  FontWeight.Bold),
             readOnly = true,
-            value = selectedOption,
+            value = currentSellerName,
             onValueChange = {},
-            label = { Text(label, fontWeight = FontWeight.Bold, ) },
+            label = { Text(label, fontWeight = FontWeight.ExtraBold ) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             shape = shape,
             colors = ExposedDropdownMenuDefaults.textFieldColors(
@@ -57,11 +57,11 @@ fun Dropdown(label:String, options: List<String>, currentItem: Item?, onChange: 
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
-            options.forEach { selectionOption ->
+            options.forEach { seller ->
                 DropdownMenuItem(
-                    text = { Text(selectionOption) },
+                    text = { Text(seller.name) },
                     onClick = {
-                        onChange(selectionOption)
+                        onChange(seller.id)
                         expanded = false
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
