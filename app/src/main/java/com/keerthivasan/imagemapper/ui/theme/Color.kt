@@ -10,5 +10,8 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-val IndigoPrimary = Color(0xFF8C29EE)
+val Indigo80 = Color(0xFFB880F0)
+val IndigoSecondary80 = Color(0xFFD4BAEE)
+
+val IndigoPrimary = Color(0xFF8C2BED)
 val IndigoSecondary = Color(0xFFC5A6E4)

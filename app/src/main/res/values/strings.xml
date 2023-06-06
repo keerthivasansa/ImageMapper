@@ -1,16 +1,6 @@
 <resources>
-    <string name="app_name">WeatherApp</string>
-    <string-array name="spinner">
-        <item>Sunny</item>
-        <item>Snowy</item>
-        <item>Rainy</item>
-    </string-array>
-    <string-array name="operations">
-        <item>Add</item>
-        <item>Subtract</item>
-        <item>Divide</item>
-        <item>Multiply</item>
-    </string-array>
+    <string name="app_name">ImageMapper</string>
     <string name="title_activity_demo">Create new Seller</string>
-    <string name="title_activity_main2">MainActivity2</string>
+    <string name="title_activity_main2">Seller</string>
+    <string name="title_activity_item_intent">Item</string>
 </resources>

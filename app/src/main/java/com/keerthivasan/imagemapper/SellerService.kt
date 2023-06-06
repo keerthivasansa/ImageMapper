@@ -30,6 +30,16 @@ class SellerService(private val sellerId: String) {
         return sellerNames
     }
 
+    suspend fun getSellers(): List<Seller> {
+        val docs = collectionRef.get().await() ?: return listOf()
+        val sellerNames = docs.documents.map {doc ->
+            val seller = getSellerFromDoc(doc)
+            sellerMap[seller.name] = seller.id
+            seller
+        }
+        return sellerNames
+    }
+
     fun getSellerId(sellerName:String): String? {
         return sellerMap[sellerName]
     }
