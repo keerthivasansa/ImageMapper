@@ -8,15 +8,16 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,7 +57,7 @@ import java.text.DateFormat
 import java.util.Date
 
 data class Item(
-    val imageUri: Uri,
+    val imageUri: List<Uri>,
     var description: String,
     val sellerId: String,
     val date: Date,
@@ -138,7 +139,8 @@ class ItemIntent : ComponentActivity() {
         val seller = SellerService(currentItem.sellerId)
         coroutineScope.launch {
             seller.get()
-            seller.openSellerWithImage(applicationContext, currentItem.imageUri)
+            val uri = currentItem.imageUri.first()
+            seller.openSellerWithImage(applicationContext, uri)
         }
     }
 
@@ -158,31 +160,61 @@ class ItemIntent : ComponentActivity() {
             "seller" to currentItem.sellerId
         )
 
-        collectionRef
-            .document(imageHash)
-            .set(data)
-            .addOnSuccessListener {
+        var count = currentItem.imageUri.size
+
+        fun unlock() {
+            count--
+            if (count == 0)
                 Toast.makeText(applicationContext, "Saved to Database", Toast.LENGTH_SHORT).show()
-            }
+        }
+
+        currentItem.imageUri.forEach {
+            val hash = getHash(it) ?: return@forEach
+            collectionRef
+                .document(hash)
+                .set(data)
+                .addOnSuccessListener { unlock() }
+        }
+    }
+
+    private fun getHash(uri: Uri): String? {
+        val data = Utils.readStringFromUri(uri, contentResolver) ?: return null
+        return Utils.md5(data)
     }
 
     private suspend fun getItem(): Item? {
         val item = intent.clipData?.getItemAt(0)
-        item?.uri?.let { imageUri ->
-            val data = Utils.readStringFromUri(imageUri, contentResolver) ?: return@let
-            imageHash = Utils.md5(data)
+        val clipData = intent.clipData
+        val imageUris = mutableListOf<Uri>()
+
+        if (clipData != null) {
+            for (i in 0 until clipData.itemCount) {
+                val uri = clipData.getItemAt(i).uri
+                imageUris.add(uri)
+            }
+        }
+
+        if (imageUris.isEmpty()) {
+            return null
+        }
+
+        val isIndividual = imageUris.size == 1
+
+        if (isIndividual) {
+            val imageUri = imageUris.first()
+            imageHash = getHash(imageUri) ?: ""
             val doc = collectionRef.document(imageHash).get().await()
             val desc = doc.getString("description")
             val sellerId = doc.getString("seller")
             val createdAt = doc.getDate("created_at")
             if (desc == null || sellerId == null || createdAt == null) {
                 println("Item is null. Description: $desc, SellerId: $sellerId")
-                return Item(imageUri, "", "", Date())
+                return Item(imageUris, "", "", Date())
             }
-            return Item(imageUri, desc, sellerId, createdAt)
+            return Item(imageUris, desc, sellerId, createdAt)
+        } else {
+            return Item(imageUris, "", "", Date())
         }
-        println("Item is null. No imageUri found.")
-        return null
     }
 }
 
@@ -200,11 +232,12 @@ fun CalendarDialog(currentItem: Item?) {
         readOnly = true,
         value = formatter.format(currentItem?.date ?: Date()),
         onValueChange = {},
-        label = { Text("Created on:", fontWeight = FontWeight.ExtraBold ) },
+        label = { Text("Created on:", fontWeight = FontWeight.ExtraBold) },
         trailingIcon = {
             Icon(
                 painterResource(com.google.android.material.R.drawable.material_ic_calendar_black_24dp),
-                contentDescription = "Calendar"
+                contentDescription = "Calendar",
+                Modifier.size(24.dp)
             )
         },
         shape = shape,
@@ -222,13 +255,25 @@ fun ItemScreen(
     onDescriptionChange: (String) -> Unit
 ) {
     if (currentItem != null) {
-        Image(
-            painter = rememberAsyncImagePainter(currentItem.imageUri),
-            contentDescription = "Item Image",
-            modifier = Modifier
-                .width(300.dp)
-                .height(300.dp)
-        )
+        val totalImages = currentItem.imageUri.size
+        if (totalImages > 1)
+        Text("$totalImages images loaded.", fontSize = 13.sp, color = Color.Gray)
+        Box(
+            contentAlignment = Alignment.CenterStart, // or Alignment.End
+            modifier = Modifier.horizontalScroll(rememberScrollState())
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                currentItem.imageUri.forEach { uri ->
+                    Image(
+                        painter = rememberAsyncImagePainter(uri),
+                        contentDescription = "Item Image",
+                        modifier = Modifier
+                            .width(240.dp)
+                            .height(240.dp)
+                    )
+                }
+            }
+        }
         TextField(value = currentItem.description, onValueChange = onDescriptionChange)
     } else {
         Text("Loading image", modifier = Modifier.padding(bottom = 24.dp))
@@ -245,7 +290,7 @@ fun GreetingPreview3() {
         ) {
             val uri =
                 Uri.parse("https://assets.myntassets.com/h_1440,q_90,w_1080/v1/assets/images/19473744/2022/9/13/5b4fc687-b93b-4141-aeb6-1bd82db75e671663054576612-Antheaa-Women-Dresses-631663054576038-1.jpg")
-            val currentItem = Item(uri, "nice", "sef", Date())
+            val currentItem = Item(listOf(uri), "nice", "sef", Date())
             ItemScreen(currentItem, onDescriptionChange = {})
         }
     }
