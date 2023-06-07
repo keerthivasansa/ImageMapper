@@ -18,11 +18,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.keerthivasan.imagemapper.ui.theme.ImageMapperTheme
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.text.isDigitsOnly
+import com.keerthivasan.imagemapper.ui.theme.ImageMapperTheme
 import com.keerthivasan.imagemapper.SellerService
 import com.keerthivasan.imagemapper.ui.core.AppShell
 

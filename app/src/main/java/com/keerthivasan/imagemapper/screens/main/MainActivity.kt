@@ -18,17 +18,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.keerthivasan.imagemapper.ui.theme.ImageMapperTheme
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.keerthivasan.imagemapper.ui.theme.ImageMapperTheme
 import com.keerthivasan.imagemapper.screens.createSeller.CreateSeller
 import com.keerthivasan.imagemapper.SellerService
 import com.keerthivasan.imagemapper.Utils
@@ -49,9 +50,13 @@ class MainActivity2 : ComponentActivity() {
 fun CreateSellerFAB() {
     val context = LocalContext.current
     val switchIntent = Intent(context, CreateSeller::class.java)
-    FloatingActionButton(onClick = {
-        context.startActivity(switchIntent)
-    }) {
+    FloatingActionButton(
+        onClick = {
+            context.startActivity(switchIntent)
+        },
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary
+    ) {
         Icon(Icons.Default.Add, contentDescription = "Create Seller")
     }
 }
@@ -72,18 +77,19 @@ fun SellerList() {
 
     LazyColumn(modifier = Modifier.padding(top = 14.dp, start = 16.dp)) {
         items(sellers) { seller ->
-            Box(modifier = Modifier
-                .height(60.dp)
-                .fillMaxWidth()
-                .clickable {
-                    val id = sellerService.getSellerId(seller)
-                    coroutineScope.launch {
-                        if (id is String)
-                            SellerService(id).openSeller(context)
-                        else
-                            Utils.showToast("Failed to open $seller", context)
-                    }
-                }, contentAlignment = Alignment.CenterStart
+            Box(
+                modifier = Modifier
+                    .height(60.dp)
+                    .fillMaxWidth()
+                    .clickable {
+                        val id = sellerService.getSellerId(seller)
+                        coroutineScope.launch {
+                            if (id is String)
+                                SellerService(id).openSeller(context)
+                            else
+                                Utils.showToast("Failed to open $seller", context)
+                        }
+                    }, contentAlignment = Alignment.CenterStart
             ) {
                 Text(text = seller, textAlign = TextAlign.Start, modifier = Modifier.padding(8.dp))
             }

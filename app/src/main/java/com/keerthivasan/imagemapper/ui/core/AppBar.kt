@@ -7,6 +7,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -22,9 +23,10 @@ fun TopBar(title: String, navigationIcon: @Composable () -> Unit) {
     TopAppBar(
         title = { Text(title, fontWeight = FontWeight.Bold) },
         navigationIcon = navigationIcon,
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
             containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
 }
@@ -37,7 +39,7 @@ fun TopBarWithBackBtn(title: String) {
             val intent = Intent(context, MainActivity2::class.java)
             context.startActivity(intent)
         }) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Go Back", tint = Color.Black)
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Go Back")
         }
     })
 }

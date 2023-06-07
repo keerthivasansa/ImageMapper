@@ -44,12 +44,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.keerthivasan.imagemapper.ui.theme.ImageMapperTheme
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.keerthivasan.imagemapper.SellerService
 import com.keerthivasan.imagemapper.Utils
 import com.keerthivasan.imagemapper.ui.core.AppShell
-import com.keerthivasan.imagemapper.ui.theme.ImageMapperTheme
 import com.keerthivasan.imagemapper.viewmodels.ItemViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
