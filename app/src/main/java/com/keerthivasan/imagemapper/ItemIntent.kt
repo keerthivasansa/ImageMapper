@@ -257,7 +257,7 @@ fun ItemScreen(
     if (currentItem != null) {
         val totalImages = currentItem.imageUri.size
         if (totalImages > 1)
-        Text("$totalImages images loaded.", fontSize = 13.sp, color = Color.Gray)
+            Text("$totalImages images loaded.", fontSize = 13.sp, color = Color.Gray)
         Box(
             contentAlignment = Alignment.CenterStart, // or Alignment.End
             modifier = Modifier.horizontalScroll(rememberScrollState())

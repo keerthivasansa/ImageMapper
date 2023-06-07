@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -99,7 +100,7 @@ fun SellerList(padding: PaddingValues) {
 
     LazyColumn(modifier = Modifier.padding(top = padding.calculateTopPadding() + 14.dp, start = 16.dp)) {
         items(sellers) { seller ->
-            Box(modifier = Modifier.height(60.dp).width(120.dp).clickable {
+            Box(modifier = Modifier.height(60.dp).fillMaxWidth().clickable {
                 val id = sellerService.getSellerId(seller)
                 coroutineScope.launch {
                     if (id is String)
