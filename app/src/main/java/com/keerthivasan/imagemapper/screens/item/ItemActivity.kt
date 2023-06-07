@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
-package com.keerthivasan.imagemapper
+package com.keerthivasan.imagemapper.screens.item
 
 import android.net.Uri
 import android.os.Bundle
@@ -32,10 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,7 +46,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.keerthivasan.imagemapper.SellerService
+import com.keerthivasan.imagemapper.Utils
+import com.keerthivasan.imagemapper.ui.core.AppShell
 import com.keerthivasan.imagemapper.ui.theme.ImageMapperTheme
+import com.keerthivasan.imagemapper.viewmodels.ItemViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -70,62 +72,55 @@ class ItemIntent : ComponentActivity() {
     private val sellerService = SellerService("")
     private var imageHash = ""
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
-
+    private val viewModel = ItemViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
-            ImageMapperTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
+            val scrollState = rememberScrollState()
+            val state by viewModel.uiState.collectAsState()
+
+            AppShell(title = state.activityName) {
+                LaunchedEffect(Unit) {
+                    var item = getItem()
+                    if (item == null)
+                        Toast.makeText(applicationContext, "Item null", Toast.LENGTH_SHORT)
+                            .show()
+                    val sellers = sellerService.getSellers()
+                    if (item?.sellerId == "" && sellers.isNotEmpty())
+                        item = item.copy(sellerId = sellers.first().id)
+                    viewModel.setCurrentItem(item)
+                    viewModel.setSellers(sellers)
+                }
+
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(scrollState)
+                        .fillMaxWidth()
+                        .padding(top = 24.dp, bottom = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(
+                        16.dp,
+                        Alignment.CenterVertically
+                    ),
                 ) {
-                    var currentItem by remember { mutableStateOf<Item?>(null) }
-                    var sellers by remember { mutableStateOf<List<Seller>>(listOf()) }
-                    val scrollState = rememberScrollState()
-
-                    LaunchedEffect(Unit) {
-                        val item = getItem()
-                        if (item == null)
-                            Toast.makeText(applicationContext, "Item null", Toast.LENGTH_SHORT)
-                                .show()
-                        currentItem = item
-                        sellers = sellerService.getSellers()
-                        if (item?.sellerId == "" && sellers.isNotEmpty())
-                            currentItem = item.copy(sellerId = sellers.first().id)
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(scrollState)
-                            .fillMaxWidth()
-                            .padding(top = 24.dp, bottom = 24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(
-                            16.dp,
-                            Alignment.CenterVertically
-                        ),
-                    ) {
-                        ItemScreen(currentItem, onDescriptionChange = {
-                            val newItem = currentItem?.copy(description = it)
-                            currentItem = newItem
-                        })
-                        Dropdown(
-                            "Seller:",
-                            sellers,
-                            currentItem,
-                            onChange = { currentItem = currentItem?.copy(sellerId = it) })
-                        CalendarDialog(currentItem)
-                        Row {
-                            Button(onClick = { saveItem(currentItem) }) {
-                                Text("Save")
-                            }
-                            Button(
-                                onClick = { openSellerChat(currentItem) },
-                                Modifier.padding(start = 24.dp)
-                            ) {
-                                Text("Open")
-                            }
+                    ItemScreen(state.currentItem, onDescriptionChange = {
+                        viewModel.setItemDescription(it)
+                    })
+                    Dropdown(
+                        "Seller:",
+                        state.sellers,
+                        state.currentItem,
+                        onChange = { viewModel.setItemSeller(it) })
+                    CalendarDialog(state.currentItem)
+                    Row {
+                        Button(onClick = { saveItem() }) {
+                            Text("Save")
+                        }
+                        Button(
+                            onClick = { openSellerChat() },
+                            Modifier.padding(start = 24.dp)
+                        ) {
+                            Text("Open")
                         }
                     }
                 }
@@ -133,9 +128,8 @@ class ItemIntent : ComponentActivity() {
         }
     }
 
-    private fun openSellerChat(currentItem: Item?) {
-        if (currentItem == null)
-            return
+    private fun openSellerChat() {
+        val currentItem = viewModel.uiState.value.currentItem ?: return
         val seller = SellerService(currentItem.sellerId)
         coroutineScope.launch {
             seller.get()
@@ -144,7 +138,8 @@ class ItemIntent : ComponentActivity() {
         }
     }
 
-    private fun saveItem(currentItem: Item?) {
+    private fun saveItem() {
+        val currentItem = viewModel.uiState.value.currentItem
         if (currentItem == null) {
             Toast.makeText(
                 applicationContext,
@@ -183,7 +178,6 @@ class ItemIntent : ComponentActivity() {
     }
 
     private suspend fun getItem(): Item? {
-        val item = intent.clipData?.getItemAt(0)
         val clipData = intent.clipData
         val imageUris = mutableListOf<Uri>()
 
@@ -209,8 +203,10 @@ class ItemIntent : ComponentActivity() {
             val createdAt = doc.getDate("created_at")
             if (desc == null || sellerId == null || createdAt == null) {
                 println("Item is null. Description: $desc, SellerId: $sellerId")
+                viewModel.setActivityName("New Item")
                 return Item(imageUris, "", "", Date())
             }
+            viewModel.setActivityName("Saved Item")
             return Item(imageUris, desc, sellerId, createdAt)
         } else {
             return Item(imageUris, "", "", Date())

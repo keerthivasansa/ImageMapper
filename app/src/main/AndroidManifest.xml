@@ -19,7 +19,7 @@
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".ItemIntent"
+            android:name=".screens.item.ItemIntent"
             android:exported="true"
             android:label="@string/title_activity_item_intent">
             <intent-filter>
@@ -34,11 +34,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CreateSeller"
+            android:name=".screens.createSeller.CreateSeller"
             android:exported="false"
             android:label="Create New Seller" />
         <activity
-            android:name=".MainActivity2"
+            android:name=".screens.main.MainActivity2"
             android:exported="true"
             android:label="@string/title_activity_main2">
             <intent-filter>
